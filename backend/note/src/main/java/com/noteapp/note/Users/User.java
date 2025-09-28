@@ -1,5 +1,6 @@
 package com.noteapp.note.Users;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.noteapp.note.Notes.Note;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -38,9 +39,11 @@ public class User {
 
     @NotBlank
     @Size(min = 6, max = 100)
+    @JsonIgnore
     private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Note> notes;
 
     public User(String username, String fullName, String email, String password) {

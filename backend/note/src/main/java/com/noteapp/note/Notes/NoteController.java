@@ -2,6 +2,7 @@ package com.noteapp.note.Notes;
 
 import com.noteapp.note.Users.User;
 import com.noteapp.note.Users.UserService;
+import com.noteapp.note.Notes.dto.NoteResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,36 +22,41 @@ public class NoteController {
     private UserService userService;
 
     @PostMapping
-    public Note createNote(@RequestBody Note note, @AuthenticationPrincipal UserDetails userDetails) {
+    public NoteResponse createNote(@RequestBody Note note, @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.findByUsername(userDetails.getUsername());
         note.setUser(user);
-        return noteService.create(note);
+        Note createdNote = noteService.create(note);
+        return NoteResponse.from(createdNote);
     }
 
     @GetMapping
-    public List<Note> getAllNotes(@AuthenticationPrincipal UserDetails userDetails) {
+    public List<NoteResponse> getAllNotes(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.findByUsername(userDetails.getUsername());
-        return noteService.findAllByUser(user);
+        return noteService.findAllByUser(user)
+                .stream()
+                .map(NoteResponse::from)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public Note getNoteById(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+    public NoteResponse getNoteById(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.findByUsername(userDetails.getUsername());
         Note note = noteService.findById(id);
         if (!note.getUser().getId().equals(user.getId())) {
             throw new RuntimeException("Access denied: Note does not belong to user");
         }
-        return note;
+        return NoteResponse.from(note);
     }
 
     @PutMapping("/{id}")
-    public Note updateNote(@PathVariable Long id, @RequestBody Note noteDetails, @AuthenticationPrincipal UserDetails userDetails) {
+    public NoteResponse updateNote(@PathVariable Long id, @RequestBody Note noteDetails, @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.findByUsername(userDetails.getUsername());
         Note note = noteService.findById(id);
         if (!note.getUser().getId().equals(user.getId())) {
             throw new RuntimeException("Access denied: Note does not belong to user");
         }
-        return noteService.update(id, noteDetails);
+        Note updatedNote = noteService.update(id, noteDetails);
+        return NoteResponse.from(updatedNote);
     }
 
     @DeleteMapping("/{id}")

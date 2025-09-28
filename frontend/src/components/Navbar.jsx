@@ -13,6 +13,16 @@ const Navbar = () => {
   };
 
   const isActive = (path) => {
+    if (!path) {
+      return false;
+    }
+
+    if (path.includes('#')) {
+      const [pathname, hash] = path.split('#');
+      const normalizedHash = hash ? `#${hash}` : '';
+      return location.pathname === pathname && location.hash === normalizedHash;
+    }
+
     return location.pathname === path;
   };
 
@@ -30,6 +40,7 @@ const Navbar = () => {
   const authenticatedNavLinks = [
     { path: '/', label: 'Home' },
     { path: '/dashboard', label: 'Dashboard' },
+    { path: '/notes', label: 'Notes' },
   ];
 
   const currentNavLinks = isAuthenticated() ? authenticatedNavLinks : publicNavLinks;

@@ -9,6 +9,7 @@ class AuthService {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
 
@@ -50,6 +51,7 @@ class AuthService {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(userData),
       });
 
@@ -85,14 +87,22 @@ class AuthService {
 
   logout() {
     console.log('[AuthService] Logging out user');
-    localStorage.removeItem('user');
-    console.log('[AuthService] User logged out, localStorage cleared');
 
-    // Dispatch custom event to notify AuthContext of logout
-    console.log('[AuthService] Dispatching authChange event for logout');
-    window.dispatchEvent(new CustomEvent('authChange', {
-      detail: { action: 'logout', user: null }
-    }));
+    fetch(`${API_BASE_URL}/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    }).catch((error) => {
+      console.error('[AuthService] Logout request failed:', error);
+    }).finally(() => {
+      localStorage.removeItem('user');
+      console.log('[AuthService] User logged out, localStorage cleared');
+
+      // Dispatch custom event to notify AuthContext of logout
+      console.log('[AuthService] Dispatching authChange event for logout');
+      window.dispatchEvent(new CustomEvent('authChange', {
+        detail: { action: 'logout', user: null }
+      }));
+    });
   }
 
   getCurrentUser() {
